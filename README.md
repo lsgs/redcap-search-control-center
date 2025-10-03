@@ -13,7 +13,7 @@ This module adds an autocomplete lookup to the Control Center menu. You can use 
 
 Type a search term into the text box. A list of matches will be displayed. Click on an entry in the list to navigate to that page.
 
-<img title="search control centre" src=""/>
+<img title="search control centre" src="https://redcap.mcri.edu.au/surveys/index.php?pid=14961&__passthru=DataEntry%2Fimage_view.php&doc_id_hash=21fe4bb0c9e075fcf30d98fb2271f4a2ae1c91ac&id=2179316&s=VtvBBsLALdoYtoE7&page=file_page&record=20&event_id=47634&field_name=thefile&instance=1"/>
 
 ### Content Capture
 
