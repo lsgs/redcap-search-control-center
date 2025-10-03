@@ -166,7 +166,7 @@ class SearchControlCenter extends AbstractExternalModule
                                     result = '<span class="text-muted"><i class="fas fa-minus-circle"></i> Capture ignored - external site</span>';
                                     break;
                                 default:
-                                    result = '<span class="text-danger"><i class="fas fa-times-circle"></i> '+woops+'</span>';
+                                    result = '<span class="text-danger"><i class="fas fa-times-circle"></i> Capture failed - check module logging for details</span>';
                                     break;
                             }
                             module.updateResult(response.id, result);
@@ -228,18 +228,30 @@ class SearchControlCenter extends AbstractExternalModule
      * @return array [id,result] result: sccCaptureResultSuccess=1; sccCaptureResultIgnore=0; sccCaptureResultFailed=-1
      */
     protected function captureContent($payload): array {
-        $result = array('id'=>$payload[0]);
-        $section = $payload[1];
-        $title = $payload[2];
-        $url = $payload[3];
+        $result = array('id'=>intval($payload[0]));
+        $section = $this->escape($payload[1]);
+        $title = $this->escape($payload[2]);
+        $url = $this->escape($payload[3]);
         
         if (starts_with($url,'/') || starts_with($url,APP_PATH_WEBROOT_FULL)) {
-            if (starts_with($url,'/')) $url = APP_PATH_WEBROOT_FULL.str_replace(APP_PATH_WEBROOT_PARENT,'',$url);
+            if (starts_with($url,'/')) $url = APP_PATH_WEBROOT_FULL.substr($url,length(APP_PATH_WEBROOT_PARENT));
             $divText = $section.' '.$title;
+
             $html = $this->http_get($url);
-            $page = new \DOMDocument();
-            $page->loadHTML($html); 
-            $xpath = new \DOMXPath($page);
+            if (empty($html)) {
+                $this->log("Section=$section; Title=$title; Could not GET content from url $url");
+                $result['result'] = self::sccCaptureResultFailed;
+                return $result;
+            }
+            try {
+                $page = new \DOMDocument();
+                $page->loadHTML($html); 
+                $xpath = new \DOMXPath($page);
+            } catch (\Throwable $th) {
+                $this->log("Section=$section; Title=$title; Failed loading HTML to DOMDocument: \'".substr($page, 0, 100)."...\"");
+                $result['result'] = self::sccCaptureResultFailed;
+                return $result;
+            }
 
             $query = "//div[@id='control_center_window']//*[not(self::script)]";
             $nodes = $xpath->query($query);
