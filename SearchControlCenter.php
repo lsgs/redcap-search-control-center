@@ -401,16 +401,18 @@ class SearchControlCenter extends AbstractExternalModule
         $allSettings = $this->getSystemSettings();
         
         foreach ($allSettings['cc-page-text']['system_value'] as $idx => $text) {
-            $pos = strpos($text, $query);
+            $pos = stripos($text, $query); // case-insensitive
             if ($pos!==false) {
-                $matchStart = ($pos-$lenPrefix < 0) ? 0 : $pos-$lenPrefix;
-                $matchedText = substr($text, $matchStart, $lenPrefix+strlen($query)+$lenSuffix);
-                $displayText = '<strong>'.$allSettings['cc-page-section']['system_value'][$idx].'</strong>: ';
-                $displayText .= $allSettings['cc-page-title']['system_value'][$idx];
-                $displayText .= '<br><span>'.str_replace($query, "<span class='rc-search-highlight'>$query</span>", $matchedText).'</span>';
+                $matchPrefix = substr($text, ($pos-$lenPrefix < 0) ? 0 : $pos-$lenPrefix, $lenPrefix);
+                $matched = substr($text, $pos, strlen($query));
+                $matchSuffix = substr($text, $pos+strlen($query), $lenSuffix);
+
+                $displayText = '<strong>'.$allSettings['cc-page-section']['system_value'][$idx].': ';
+                $displayText .= $allSettings['cc-page-title']['system_value'][$idx].'</strong><br>';
+                $displayText .= '<span>'.$matchPrefix.'<span class="rc-search-highlight">'.$matched.'</span>'.$matchSuffix.'</span>';
                 
                 $results[] = array(
-                    'result_url' => $allSettings['cc-page-url']['system_value'][$idx].'#:~:text='.urlencode($query),
+                    'result_url' => $allSettings['cc-page-url']['system_value'][$idx].'#:~:text='.urlencode($matched),
                     'result_display' => $displayText
                 );
             }
