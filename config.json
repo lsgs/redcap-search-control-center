@@ -1,0 +1,70 @@
+{
+	"name": "Search Control Center",
+	"description": "REDCap external module that enables searching for and navigating to Control Center settings.",
+	"namespace": "MCRI\\SearchControlCenter",
+	"authors": [
+		{
+			"name": "Luke Stevens",
+			"email": "luke.stevens@mcri.edu.au",
+			"institution": "Murdoch Children's Research Institute"
+		}
+	],
+    "framework-version": 16,
+    "auth-ajax-actions": [ "capture-details", "capture-content", "capture-complete", "search" ],
+    "links": {
+        "control-center": [
+            {
+                "name": "Control Center Content Capture",
+                "icon": "fas fa-magnifying-glass",
+                "url": "manage_search.php",
+                "show-header-and-footer": false
+            }
+        ]
+    },
+    "system-settings": [
+        {
+            "name": "Content capture version",
+            "key": "content-capture-version",
+            "type": "text",
+            "required": true
+        },
+        {
+            "name": "Content capture time",
+            "key": "content-capture-time",
+            "type": "text",
+            "required": true
+        },
+        {
+            "name": "Control Center Pages",
+            "key": "control-center-pages",
+            "type": "sub_settings",
+            "repeatable": true,
+            "sub_settings": [
+                {
+                    "name": "Page Section",
+                    "key": "cc-page-section",
+                    "type": "text",
+                    "required": true
+                },
+                {
+                    "name": "Page Title",
+                    "key": "cc-page-title",
+                    "type": "text",
+                    "required": true
+                },
+                {
+                    "name": "Page URL",
+                    "key": "cc-page-url",
+                    "type": "text",
+                    "required": true
+                },
+                {
+                    "name": "Page text",
+                    "key": "cc-page-text",
+                    "type": "textarea",
+                    "required": true
+                }
+            ]
+        }
+	]
+}
