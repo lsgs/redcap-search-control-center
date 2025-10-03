@@ -25,14 +25,12 @@
         {
             "name": "Content capture version",
             "key": "content-capture-version",
-            "type": "text",
-            "required": true
+            "type": "text"
         },
         {
             "name": "Content capture time",
             "key": "content-capture-time",
-            "type": "text",
-            "required": true
+            "type": "text"
         },
         {
             "name": "Control Center Pages",
@@ -43,26 +41,22 @@
                 {
                     "name": "Page Section",
                     "key": "cc-page-section",
-                    "type": "text",
-                    "required": true
+                    "type": "text"
                 },
                 {
                     "name": "Page Title",
                     "key": "cc-page-title",
-                    "type": "text",
-                    "required": true
+                    "type": "text"
                 },
                 {
                     "name": "Page URL",
                     "key": "cc-page-url",
-                    "type": "text",
-                    "required": true
+                    "type": "text"
                 },
                 {
                     "name": "Page text",
                     "key": "cc-page-text",
-                    "type": "textarea",
-                    "required": true
+                    "type": "textarea"
                 }
             ]
         }

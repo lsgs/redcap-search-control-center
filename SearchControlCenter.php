@@ -139,6 +139,9 @@ class SearchControlCenter extends AbstractExternalModule
             /* External Module: Search Control Center */
             $(function(){
                 let module = <?=$this->getJavascriptModuleObjectName()?>;
+                module.sccCaptureResultSuccess = <?=self::sccCaptureResultSuccess?>;
+                module.sccCaptureResultIgnore = <?=self::sccCaptureResultIgnore?>;
+                module.sccCaptureResultFailed = <?=self::sccCaptureResultFailed?>;
                 module.cc_refreshContent = function() {
                     $('#em-search-control-center-capture-results').html('');
                     $('#em-search-control-center-capture').prop('disabled', true);
@@ -147,8 +150,8 @@ class SearchControlCenter extends AbstractExternalModule
                     $('#control_center_menu').find('a:visible').each(function() {
                         id++;
                         let thisText = $(this).text();
+                        if (thisText.startsWith('To-Do List')) thisText = 'To-Do List';
                         let thisSection = $(this).closest('.cc_menu_section').find('.cc_menu_header:first').text();
-                        if (thisSection.startsWith('To-Do List')) thisSection = 'To-Do List';
                         if (thisSection.startsWith('External Modules')) thisSection = 'External Modules';
                         let thisHref = $(this).attr('href');
                         let thisResult = resultContainer.replace('|ID|', id).replace('|SECTION|', thisSection).replace('|TEXT|', thisText).replace('|HREF|', thisHref);
@@ -156,10 +159,10 @@ class SearchControlCenter extends AbstractExternalModule
                         module.ajax('capture-content', [id,thisSection,thisText,thisHref]).then(function(response) {
                             let result = '';
                             switch (response.result) {
-                                case 1:
+                                case module.sccCaptureResultSuccess:
                                     result = '<span class="text-success"><i class="fas fa-check-circle"></i> Capture complete</span>';
                                     break;
-                                case 0:
+                                case module.sccCaptureResultIgnore:
                                     result = '<span class="text-muted"><i class="fas fa-minus-circle"></i> Capture ignored - external site</span>';
                                     break;
                                 default:
@@ -234,7 +237,7 @@ class SearchControlCenter extends AbstractExternalModule
             if (starts_with($url,'/')) $url = APP_PATH_WEBROOT_FULL.str_replace(APP_PATH_WEBROOT_PARENT,'',$url);
             $divText = $section.' '.$title;
             $html = $this->http_get($url);
-            $page = new \DOMDocument(); //  \Dom\HTMLDocument::createFromString($html);
+            $page = new \DOMDocument();
             $page->loadHTML($html); 
             $xpath = new \DOMXPath($page);
 
@@ -255,10 +258,10 @@ class SearchControlCenter extends AbstractExternalModule
             foreach ($nodes as $node) {
                 if (in_array($node->nodeName, static::$CaptureFromNodes)) {
                     $nodeText = trim($node->nodeValue);
-                    if (preg_match('/[a-z][a-z_]+_\d+\s=\s/m', $nodeText)) {
+                    if (preg_match('/\b[a-z][a-z_]+_\d+\s=\s/m', $nodeText)) {
                         $nodeText = ''; // ignore literal text from language file found in some pages
-                    } else if (length($nodeText) > 10000) {
-                        $nodeText = substr($nodeText, 0, 10000);
+                    } else if (length($nodeText) > 64*1024) {
+                        $nodeText = substr($nodeText, 0, 64*1024);
                     }
                     $divText .= (empty($nodeText)) ? '' : '\n'.$nodeText;
                 //} else if (array_key_exists($node->nodeName, $ignoredNodes)) {
@@ -270,7 +273,7 @@ class SearchControlCenter extends AbstractExternalModule
             //$this->log('Ignored nodes: '.print_r($ignoredNodes, true));
             $result['result'] = $this->updateCapturedContent($section, $title, $url, $divText);
         } else {
-            $result['result'] = 0;
+            $result['result'] = self::sccCaptureResultIgnore;
         }
 
         return $result;
@@ -291,8 +294,7 @@ class SearchControlCenter extends AbstractExternalModule
      * http_get()
      * Copy of curl call from \http_get() but including cookie so can get authenticated page content
      */
-    protected function http_get($url="", $timeout=null, $basic_auth_user_pass="", $headers=array(), $user_agent=null)
-    {
+    protected function http_get($url="", $timeout=null, $basic_auth_user_pass="", $headers=array(), $user_agent=null) {
         $cookieString = '';
         foreach ($_COOKIE as $key => $value) {
             $cookieString.=\REDCap::escapeHtml($key)."=".\REDCap::escapeHtml($value)."; ";
@@ -377,10 +379,10 @@ class SearchControlCenter extends AbstractExternalModule
             $this->setSystemSetting('cc-page-title', $allSettings['cc-page-title']['system_value']);
             $this->setSystemSetting('cc-page-url', $allSettings['cc-page-url']['system_value']);
             $this->setSystemSetting('cc-page-text', $allSettings['cc-page-text']['system_value']);
-            $result = 1;
+            $result = self::sccCaptureResultSuccess;
         } catch (\Throwable $th) {
             $this->log("$section, $title: ".$th->getMessage());
-            $result = -1;
+            $result = self::sccCaptureResultFailed;
         }
         return $result;
     }
