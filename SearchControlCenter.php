@@ -419,6 +419,9 @@ class SearchControlCenter extends AbstractExternalModule
                 $matched = substr($text, $pos, strlen($query));
                 $matchSuffix = substr($text, $pos+strlen($query), $lenSuffix);
 
+                $matchPrefix = (strpos($matchPrefix, '\n')) ? substr($matchPrefix, 2+strpos($matchPrefix, '\n')) : $matchPrefix;
+                $matchSuffix = (strpos($matchSuffix, '\n')) ? substr($matchSuffix, 0, strpos($matchSuffix, '\n')) : $matchSuffix;
+
                 $displayText = '<strong>'.$allSettings['cc-page-section']['system_value'][$idx].': ';
                 $displayText .= $allSettings['cc-page-title']['system_value'][$idx].'</strong><br>';
                 $displayText .= '<span>'.$matchPrefix.'<span class="rc-search-highlight">'.$matched.'</span>'.$matchSuffix.'</span>';
